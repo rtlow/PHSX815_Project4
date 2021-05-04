@@ -1,0 +1,334 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+\renewcommand\thesubsection{\thesection.\alph{subsection}}
+
+\usepackage{graphicx}
+
+\usepackage{tensind}
+\tensordelimiter{?}
+
+\usepackage{dsfont}
+
+\DeclareMathOperator\cis{cis}
+\DeclareMathOperator\Arg{Arg}
+\DeclareMathOperator\Log{Log}
+\DeclareMathOperator\sign{sign}
+\DeclareMathOperator\Res{Res}
+\DeclareMathOperator\tr{tr}
+\DeclareMathOperator\sech{sech}
+\DeclareMathOperator\csch{csch}
+\DeclareMathOperator\arccosh{arccosh}
+\DeclareMathOperator\arcsinh{arcsinh}
+
+
+\def\dbar{{\mathchar'26\mkern-12mu d}}
+\end_preamble
+\use_default_options true
+\begin_modules
+customHeadersFooters
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize letterpaper
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 2
+\use_package esint 2
+\use_package mathdots 2
+\use_package mathtools 2
+\use_package mhchem 2
+\use_package stackrel 2
+\use_package stmaryrd 2
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Left Header
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+Ryan Low
+\backslash
+
+\backslash
+PHSX 815
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Right Header
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+Modeling instrumental noise and astronomical signals
+\backslash
+
+\backslash
+March 2021
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Title
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+texttt{PHSX815
+\backslash
+_Project2}:
+\backslash
+
+\backslash
+Modeling instrumental noise and astronomical signals
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Author
+Ryan Low
+\end_layout
+
+\begin_layout Date
+March 2021
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+Modern astronomy relies on Charged Coupled Devices (CCDs) and other such
+ imaging sensors for recording astronomical data.
+ All of these technologies rely on photons exciting the electrons in some
+ semiconducting material.
+ Counting those electrons becomes a proxy for the number of photons detected.
+ Because of this, recording astronomical data is a counting problem, and
+ thus we can expect the number of photons recorded on a CCD to be distributed
+ as a Poisson distribution.
+ As with all electronic measurements, we must also be aware of sources of
+ noise.
+ Since the noise appears in our counts, we can also expect it to be distributed
+ as a Poisson distribution.
+ However, the rate at which noise occurs, 
+\begin_inset Formula $\lambda_{noise}$
+\end_inset
+
+, and the rate at which photons fall onto the detector, 
+\begin_inset Formula $\lambda_{star}$
+\end_inset
+
+, depend nontrivially on other confounding factors.
+ We model detector noise and atmospheric seeing to determine when we can
+ distinguish between an astronomical signal and a noise source.
+\end_layout
+
+\begin_layout Section
+Problem Statement
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Problem-Statement"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+While we are able to characterize the average noise on a detector, that
+ doesn't mean we will know 
+\begin_inset Formula $\lambda_{noise}$
+\end_inset
+
+ exactly throughout the entire observation.
+ For instance, changing dome conditions or poorly maintained equipment can
+ cause nontrivial changes to 
+\begin_inset Formula $\lambda_{noise}$
+\end_inset
+
+.
+ For our present purposes, we will model how the noise characteristics of
+ the detector vary with temperature.
+ Because we are dealing with a semiconducting system, how the electrons
+ are distributed in energy depends on the Fermi-Dirac distribution (Equation
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:FermiDirac"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+).
+\begin_inset Formula 
+\begin{equation}
+P\left(E\right)=\frac{1}{1+\exp\left(\left(E-E_{F}\right)/k_{B}T\right)}\label{eq:FermiDirac}
+\end{equation}
+
+\end_inset
+
+For silicon, the band gap is about 
+\begin_inset Formula $1.12\,eV$
+\end_inset
+
+ and the Fermi energy is approximately half of the band gap energy.
+ Thus, we can model the average number of noise electrons from this distribution.
+\end_layout
+
+\begin_layout Standard
+Suppose our detector is a single pixel.
+ This is a small detector area.
+ Because of this, we may be collecting light from an area of the sky of
+ a few arcseconds or less.
+ The starlight from space must pass through the atmosphere, where thermal
+ variations cause the light to stochastically refract.
+ This is known as atmospheric seeing.
+ While we can measure the average seeing for a night of observation, it
+ is a stochastic process and therefore causes the apparent position of an
+ object to vary over an exposure.
+ With our small detector area, seeing will become a significant factor the
+ photon counts we measure.
+ A point source of light passing through a circular aperture produces an
+ intensity pattern given by the Airy disk (Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Airy"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+), where 
+\begin_inset Formula $J_{1}\left(x\right)$
+\end_inset
+
+ is the Bessel function of the first kind, 
+\begin_inset Formula $q$
+\end_inset
+
+ is the radial distance from the observation point to the optical axis,
+ 
+\begin_inset Formula $R$
+\end_inset
+
+ is the distance from 
+\begin_inset Formula $q$
+\end_inset
+
+ to the aperture, 
+\begin_inset Formula $a$
+\end_inset
+
+ is the radius of the aperture, and 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ is the wavelength of light.
+\begin_inset Formula 
+\begin{equation}
+I\left(\theta\right)=I_{0}\left(\frac{2J_{1}\left(2\pi aq\lambda^{-1}R^{-1}\right)}{2\pi aq\lambda^{-1}R^{-1}}\right)\label{eq:Airy}
+\end{equation}
+
+\end_inset
+
+Atmospheric seeing also is not completely uncorrelated, since the air currents
+ in the atmosphere are continuous.
+ There will be some small-scale correlation between the observed positions.
+ Therefore, we can model how the image moves by sampling the Airy disk pattern
+ using Markov Chain Monte Carlo (MCMC).
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintCited"
+bibfiles "acm_1403886"
+options "plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

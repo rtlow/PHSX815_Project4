@@ -1,0 +1,253 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+\renewcommand\thesubsection{\thesection.\alph{subsection}}
+
+\usepackage{graphicx}
+
+\usepackage{tensind}
+\tensordelimiter{?}
+
+\usepackage{dsfont}
+
+\DeclareMathOperator\cis{cis}
+\DeclareMathOperator\Arg{Arg}
+\DeclareMathOperator\Log{Log}
+\DeclareMathOperator\sign{sign}
+\DeclareMathOperator\Res{Res}
+\DeclareMathOperator\tr{tr}
+\DeclareMathOperator\sech{sech}
+\DeclareMathOperator\csch{csch}
+\DeclareMathOperator\arccosh{arccosh}
+\DeclareMathOperator\arcsinh{arcsinh}
+
+
+\def\dbar{{\mathchar'26\mkern-12mu d}}
+\end_preamble
+\use_default_options true
+\begin_modules
+customHeadersFooters
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize letterpaper
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 2
+\use_package esint 2
+\use_package mathdots 2
+\use_package mathtools 2
+\use_package mhchem 2
+\use_package stackrel 2
+\use_package stmaryrd 2
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Left Header
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+Ryan Low
+\backslash
+
+\backslash
+PHSX 815
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Right Header
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+Determining Binary Separation
+\backslash
+
+\backslash
+May 2021
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Title
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+texttt{PHSX815
+\backslash
+_Project4}:
+\backslash
+
+\backslash
+Determining Binary Separation
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Author
+Ryan Low
+\end_layout
+
+\begin_layout Date
+May 2021
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+One of the important problems in modern astronomy is the detection of a
+ binary system.
+ We will not be considering the process of detecting two objects in the
+ field of view.
+ Instead, given multiple images of a binary system taken at similar times,
+ we would like to determine the separation distance between the two stars.
+ By seeing how the separation distance changes in time, we can attempt to
+ determine further orbital parameters, such as the total mass of the system,
+ orbital period, and orbital inclination.
+ 
+\end_layout
+
+\begin_layout Section
+Problem Statement
+\end_layout
+
+\begin_layout Standard
+Suppose a sequence of two-dimensional images with two sources on it.
+ If the images are taken in a small period of time, then the source positions
+ are fixed.
+ However, because counting photons on the detector is a stochastic process,
+ as well as atmospheric seeing, the apparent positions of the objects may
+ vary over time.
+ If we wish to determine the separation distance between two stars, this
+ problem reduces to finding the most likely position of each individual
+ star given the data, then determining the distance.
+\end_layout
+
+\begin_layout Standard
+We must have a model of how point sources appear on our detector.
+ For this, we use the Airy disk (Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Airy"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+).
+\begin_inset Formula 
+\begin{equation}
+I\left(x\right)=I_{0}\left(\frac{2J_{1}\left(x\right)}{2x}\right)^{2}\label{eq:Airy}
+\end{equation}
+
+\end_inset
+
+In Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Airy"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, 
+\begin_inset Formula $x$
+\end_inset
+
+ is proportional to the radial distance from the center of the disk and
+ 
+\begin_inset Formula $J_{1}$
+\end_inset
+
+ is the Bessel function of the first kind.
+ We will simulate each observation by taking samples from this distribution
+ using fixed positions for the two sources.
+ Using this simulated data, we will determine the positions of the sources
+ by maximizing a likelihood.
+\end_layout
+
+\end_body
+\end_document

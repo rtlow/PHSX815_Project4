@@ -1,0 +1,1300 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+\renewcommand\thesubsection{\thesection.\alph{subsection}}
+
+\usepackage{graphicx}
+
+\usepackage{tensind}
+\tensordelimiter{?}
+
+\usepackage{dsfont}
+
+\DeclareMathOperator\cis{cis}
+\DeclareMathOperator\Arg{Arg}
+\DeclareMathOperator\Log{Log}
+\DeclareMathOperator\sign{sign}
+\DeclareMathOperator\Res{Res}
+\DeclareMathOperator\tr{tr}
+\DeclareMathOperator\sech{sech}
+\DeclareMathOperator\csch{csch}
+\DeclareMathOperator\arccosh{arccosh}
+\DeclareMathOperator\arcsinh{arcsinh}
+
+
+\def\dbar{{\mathchar'26\mkern-12mu d}}
+\end_preamble
+\use_default_options true
+\begin_modules
+customHeadersFooters
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize letterpaper
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 2
+\use_package esint 2
+\use_package mathdots 2
+\use_package mathtools 2
+\use_package mhchem 2
+\use_package stackrel 2
+\use_package stmaryrd 2
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Left Header
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+Ryan Low
+\backslash
+
+\backslash
+PHSX 815
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Right Header
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+Modeling instrumental noise and astronomical signals
+\backslash
+
+\backslash
+March 2021
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Title
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+texttt{PHSX815
+\backslash
+_Project2}:
+\backslash
+
+\backslash
+Modeling instrumental noise and astronomical signals
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Author
+Ryan Low
+\end_layout
+
+\begin_layout Date
+March 2021
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+Modern astronomy relies on Charged Coupled Devices (CCDs) and other such
+ imaging sensors for recording astronomical data.
+ All of these technologies rely on photons exciting the electrons in some
+ semiconducting material.
+ Counting those electrons becomes a proxy for the number of photons detected.
+ Because of this, recording astronomical data is a counting problem, and
+ thus we can expect the number of photons recorded on a CCD to be distributed
+ as a Poisson distribution.
+ As with all electronic measurements, we must also be aware of sources of
+ noise.
+ Since the noise appears in our counts, we can also expect it to be distributed
+ as a Poisson distribution.
+ However, the rate at which noise occurs, 
+\begin_inset Formula $\lambda_{noise}$
+\end_inset
+
+, and the rate at which photons fall onto the detector, 
+\begin_inset Formula $\lambda_{star}$
+\end_inset
+
+, depend nontrivially on other confounding factors.
+ We model detector noise and atmospheric seeing to determine when we can
+ distinguish between an astronomical signal and a noise source.
+\end_layout
+
+\begin_layout Section
+Problem Statement
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Problem-Statement"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+While we are able to characterize the average noise on a detector, that
+ doesn't mean we will know 
+\begin_inset Formula $\lambda_{noise}$
+\end_inset
+
+ exactly throughout the entire observation.
+ For instance, changing dome conditions or poorly maintained equipment can
+ cause nontrivial changes to 
+\begin_inset Formula $\lambda_{noise}$
+\end_inset
+
+.
+ For our present purposes, we will model how the noise characteristics of
+ the detector vary with temperature.
+ Because we are dealing with a semiconducting system, how the electrons
+ are distributed in energy depends on the Fermi-Dirac distribution (Equation
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:FermiDirac"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+).
+\begin_inset Formula 
+\begin{equation}
+P\left(E\right)=\frac{1}{1+\exp\left(\left(E-E_{F}\right)/k_{B}T\right)}\label{eq:FermiDirac}
+\end{equation}
+
+\end_inset
+
+For silicon, the band gap is about 
+\begin_inset Formula $1.12\,eV$
+\end_inset
+
+ and the Fermi energy is approximately half of the band gap energy.
+ Using this distribution, we can model the number of noise electrons that
+ we count, which in turn gives us a distribution for 
+\begin_inset Formula $\lambda_{noise}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Suppose our detector is a single pixel.
+ This is a small detector area.
+ Because of this, we are collecting light from an area of the sky of fractions
+ of an arcsecond.
+ The starlight from space must pass through the atmosphere, where thermal
+ variations cause the light to stochastically refract.
+ This random refraction, known as atmospheric seeing, causes the apparent
+ position of the star to rapidly change on the sky, which is why the stars
+ twinkle.
+ While we can measure the average seeing for a night of observation, it
+ is a stochastic process and therefore causes the apparent position of an
+ object to vary over an exposure.
+ With our small detector area, seeing will become a significant factor the
+ photon counts we measure.
+ A point source of light passing through a circular aperture produces an
+ intensity pattern given by the Airy disk (Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Airy"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+), where 
+\begin_inset Formula $I_{0}$
+\end_inset
+
+ is the maximum intensity of the source, 
+\begin_inset Formula $J_{1}\left(x\right)$
+\end_inset
+
+ is the Bessel function of the first kind, 
+\begin_inset Formula $q$
+\end_inset
+
+ is the radial distance from the observation point to the optical axis,
+ 
+\begin_inset Formula $R$
+\end_inset
+
+ is the distance from 
+\begin_inset Formula $q$
+\end_inset
+
+ to the aperture, 
+\begin_inset Formula $a$
+\end_inset
+
+ is the radius of the aperture, and 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ is the wavelength of light.
+\begin_inset Formula 
+\begin{equation}
+I\left(\theta\right)=I_{0}\left(\frac{2J_{1}\left(2\pi aq\lambda^{-1}R^{-1}\right)}{2\pi aq\lambda^{-1}R^{-1}}\right)^{2}\label{eq:Airy}
+\end{equation}
+
+\end_inset
+
+For simplicity, we will consider an observational configuration such that
+ 
+\begin_inset Formula $2\pi a\lambda^{-1}R^{-1}=1$
+\end_inset
+
+, that is the prefactor of 
+\begin_inset Formula $q$
+\end_inset
+
+ is unity.
+ Analytical plots of Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Airy"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ are presented in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:(Left):-An-analytical"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "50col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename Airy.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "50col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename AirySlice.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+(Left): An analytical contour plot of an Airy Disk.
+ (Right): The Airy disk as a function of radius.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:(Left):-An-analytical"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+By sampling this intensity pattern at random positions, we can model 
+\begin_inset Formula $\lambda_{star}$
+\end_inset
+
+ changing as the image of the star moves across the detector.
+\end_layout
+
+\begin_layout Section
+Algorithm Analysis
+\end_layout
+
+\begin_layout Standard
+For both models, we must eventually perform hypothesis testing.
+ In principle, that would mean integrating over all nuisance parameters.
+ In practice, we perform Gibbs sampling.
+ In Gibbs sampling, this integration is approximated by taking intermediate
+ samples of these nuisance parameters according to their own distributions.
+ Then, using those samples, we generate samples of our rate parameters and
+ feed those rate parameters into a Poisson distribution.
+ This final set of Poisson-distributed samples is a simulated set of data
+ with these nuisance parameters integrated out.
+ We use this when constructing the simulated data for the Log-Likelihood
+ Ratio (LLR) of each model.
+\end_layout
+
+\begin_layout Standard
+So that our computation time remains reasonable, we use 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+texttt{numpy}
+\end_layout
+
+\end_inset
+
+ methods wherever possible.
+ This includes both array operations and random number generation.
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+texttt{numpy}
+\end_layout
+
+\end_inset
+
+ methods are faster than their pure-Python counterparts because they pass
+ execution to an underlying 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+texttt{C}
+\end_layout
+
+\end_inset
+
+ implementation.
+ Since compiled 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+texttt{C}
+\end_layout
+
+\end_inset
+
+ code is much faster than interpreted Python code, using 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+texttt{numpy}
+\end_layout
+
+\end_inset
+
+ affords greater computational speed, which allows us to get away with some
+ less efficient methods.
+\end_layout
+
+\begin_layout Standard
+In our noise model, a noise electron is counted if it is excited into the
+ conduction band.
+ For our purposes, this occurs when the electron's energy is above the Fermi
+ level.
+ The probability that an electron has this energy is
+\begin_inset Formula 
+\[
+P_{detected}=\int_{E_{f}}^{\infty}P\left(E\right)dE
+\]
+
+\end_inset
+
+We can easily perform this integral numerically, and do so using Monte Carlo
+ integration.
+ Since the tail probability in Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:FermiDirac"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ is extremely small, it is sufficient to just integrate up to a reasonable
+ upper bound, in our case 
+\begin_inset Formula $\left(E-E_{f}\right)/k_{B}T=1$
+\end_inset
+
+.
+ Once this probability is calculated, we can produce a uniformly-distributed
+ number from 
+\begin_inset Formula $0$
+\end_inset
+
+ to 
+\begin_inset Formula $1$
+\end_inset
+
+ for each free electron in the pixel and decide whether the electron is
+ excited or not.
+ The total number of excited electrons is our noise rate parameter, 
+\begin_inset Formula $\lambda_{noise}$
+\end_inset
+
+.
+ For our purposes, we will assume that the number of free electrons is fixed.
+ How the resulting distribution of 
+\begin_inset Formula $\lambda_{noise}$
+\end_inset
+
+ looks is presented in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Distribution-of-"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename FDsamps.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Distribution of 
+\begin_inset Formula $\lambda_{noise}$
+\end_inset
+
+ following our algorithm.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Distribution-of-"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+To take samples from Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Airy"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, we perform Metropolis-Hastings sampling.
+ To do so, we randomly walk around the parameter space.
+ The 
+\begin_inset Formula $x$
+\end_inset
+
+ and 
+\begin_inset Formula $y$
+\end_inset
+
+ positions are randomly sampled from a Gaussian distribution centered on
+ the previous 
+\begin_inset Formula $x$
+\end_inset
+
+ and 
+\begin_inset Formula $y$
+\end_inset
+
+ position and with a standard deviation equal to the mean seeing.
+ We then evaluate Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Airy"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ at the proposed position and the old position and take their ratio, forming
+ the acceptance probability.
+ We do not need to obtain the Gaussian probability since they are symmetric
+ with respect to the old position and the new position.
+ By generating a uniformly distributed random number, we accept or reject
+ the new position.
+ This resulting Markov Chain gives us many samples of position on the Airy
+ disk.
+ An example of this sampling compared to its analytical counterpart is presented
+ in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Position-samples-from"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "50col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename Airy.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "50col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename AiryDisk.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+(Left): An analytical contour plot of an Airy Disk.
+ (Right): Position samples from an Airy Disk.
+ Notice how the band structure is retained.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Position-samples-from"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+ Evaluating 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Airy"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ at a position gives an intensity value, which gives us a sample of 
+\begin_inset Formula $\lambda_{star}$
+\end_inset
+
+.
+ How the resulting distribution of 
+\begin_inset Formula $\lambda_{star}$
+\end_inset
+
+ looks is presented in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Distribution-of--1"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename Airysamps.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Distribution of 
+\begin_inset Formula $\lambda_{star}$
+\end_inset
+
+ using the Airy Disk.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Distribution-of--1"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Finally, we must calculate the LLR.
+ Since we do not have the analytic form of the probability of seeing an
+ event, we must calculate that numerically.
+ To do so, we use our simulation results to form histograms.
+ Normalizing the histograms by their integrals turns the bin heights into
+ probabilities.
+ Using these numerically-calculated probabilities, we can then calculate
+ the LLR as usual (Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:LLR"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+).
+\begin_inset Formula 
+\begin{equation}
+\text{LLR}=\sum_{i}^{N}\log\left(\frac{P\left(x_{i}|H_{0}\right)}{P\left(x_{i}|H_{1}\right)}\right)\label{eq:LLR}
+\end{equation}
+
+\end_inset
+
+We consider the null hypothesis, 
+\begin_inset Formula $H_{0}$
+\end_inset
+
+, to be the case where we only detect noise.
+ The alternative hypothesis, 
+\begin_inset Formula $H_{1}$
+\end_inset
+
+, is when we detect some signal.
+ We want to reject the null hypothesis when we are observing an astronomical
+ object.
+\end_layout
+
+\begin_layout Section
+Results
+\end_layout
+
+\begin_layout Standard
+We simulate a star with mean intensity of 
+\begin_inset Formula $100$
+\end_inset
+
+ counts per second, mean seeing of 
+\begin_inset Formula $1$
+\end_inset
+
+ arcseconds, and a detector temperature of 
+\begin_inset Formula $300\,K$
+\end_inset
+
+.
+ For both models, we simulate 
+\begin_inset Formula $100$
+\end_inset
+
+ measurements over 
+\begin_inset Formula $100$
+\end_inset
+
+ experiments.
+ From our simulations, we were perfectly able to distinguish between the
+ signal and the noise.
+ The LLR plot is presented in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Log-Likelihood-Ratio-for"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "50col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename signalNoise.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset space \hspace*{\fill}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "50col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename signalNoise_low.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Log-Likelihood Ratio for a star with 
+\begin_inset Formula $I_{0}=100$
+\end_inset
+
+ counts/second and detector at (left) 
+\begin_inset Formula $T=300\,K$
+\end_inset
+
+, (right) 
+\begin_inset Formula $T=77\,K$
+\end_inset
+
+.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Log-Likelihood-Ratio-for"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+ Typically, the detector is cooled to liquid nitrogen temperatures, so around
+ 
+\begin_inset Formula $77\,K$
+\end_inset
+
+.
+ Using that temperature, we find that the distributions are still distinguishabl
+e (Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Log-Likelihood-Ratio-for"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+).
+ Surprisingly, the two distributions are closer together than they were
+ when the temperature was higher.
+ This is due to the relatively large number of 
+\begin_inset Formula $\lambda_{star}$
+\end_inset
+
+ samples near zero, due to how the Airy disk rapidly decays away from the
+ origin.
+ Despite this, it appears that atmospheric seeing does not significantly
+ impede our ability to distinguish a signal source from noise.
+ 
+\end_layout
+
+\begin_layout Standard
+We also repeated the analysis for a star with mean intensity of 
+\begin_inset Formula $20$
+\end_inset
+
+ counts per second with the same parameters as above (Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Log-Likelihood-Ratio-for-1"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+).
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "50col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename low_signalNoise.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset space \hspace*{\fill}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "50col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename low_signalNoise_low.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Log-Likelihood Ratio for a star with 
+\begin_inset Formula $I_{0}=20$
+\end_inset
+
+ counts/second and detector at (left) 
+\begin_inset Formula $T=300\,K$
+\end_inset
+
+, (right) 
+\begin_inset Formula $T=77\,K$
+\end_inset
+
+.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Log-Likelihood-Ratio-for-1"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ The two distributions are just as distinguishable.
+\end_layout
+
+\begin_layout Standard
+However, we must recognize the limitations of this model.
+ In this model, we assumed a single pixel with a very small detecting area.
+ Real detector arrays can have a field of view of several arcminutes.
+ The image moving off of one pixel, with its small detecting area, doesn't
+ affect the measurement as much since the image will move onto a different
+ pixel.
+ Thus, seeing affects our ability to resolve an image rather than detect
+ it.
+ Another major limitation is with our noise model.
+ We assumed that the number of free electrons in the pixel was fixed.
+ This is not realistic, since the number of free electrons in a pixel depends
+ on the doping process, which cannot be controlled exactly.
+\end_layout
+
+\begin_layout Section
+Conclusions
+\end_layout
+
+\begin_layout Standard
+Realistically, this kind of signal and noise modeling does not need to be
+ performed for day-to-day astronomy.
+ We have seen that it is very easy to distinguish between instrumental noise
+ and even a faint signal.
+ It is reasonable enough to characterize the mean seeing and the mean noise
+ to account for their effects.
+ However, this kind of modeling is necessary when designing new instrumentation
+ for revolutionary new observational design or when we are planning observations
+ near the extremes of our sensitivity limits.
+ The methods used in this analysis may be extended to consider two sources
+ in the detection area or for radically different intensity patterns.
+ Those extensions would allow us to model observing close binary systems
+ or observations using a more complicated instrument such as an interferometer
+ respectively.
+ The methods presented here are 
+\end_layout
+
+\end_body
+\end_document

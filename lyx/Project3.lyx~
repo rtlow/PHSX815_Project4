@@ -1,0 +1,929 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+\renewcommand\thesubsection{\thesection.\alph{subsection}}
+
+\usepackage{graphicx}
+
+\usepackage{tensind}
+\tensordelimiter{?}
+
+\usepackage{dsfont}
+
+\DeclareMathOperator\cis{cis}
+\DeclareMathOperator\Arg{Arg}
+\DeclareMathOperator\Log{Log}
+\DeclareMathOperator\sign{sign}
+\DeclareMathOperator\Res{Res}
+\DeclareMathOperator\tr{tr}
+\DeclareMathOperator\sech{sech}
+\DeclareMathOperator\csch{csch}
+\DeclareMathOperator\arccosh{arccosh}
+\DeclareMathOperator\arcsinh{arcsinh}
+
+
+\def\dbar{{\mathchar'26\mkern-12mu d}}
+\end_preamble
+\use_default_options true
+\begin_modules
+customHeadersFooters
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize letterpaper
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 2
+\use_package esint 2
+\use_package mathdots 2
+\use_package mathtools 2
+\use_package mhchem 2
+\use_package stackrel 2
+\use_package stmaryrd 2
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Left Header
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+Ryan Low
+\backslash
+
+\backslash
+PHSX 815
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Right Header
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+Characterizing instrumental noise
+\backslash
+
+\backslash
+April 2021
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Title
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+texttt{PHSX815
+\backslash
+_Project3}:
+\backslash
+
+\backslash
+Characterizing instrumental noise
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Author
+Ryan Low
+\end_layout
+
+\begin_layout Date
+March 2021
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+Modern astronomy relies on Charged Coupled Devices (CCDs) and other such
+ imaging sensors for recording astronomical data.
+ All of these technologies rely on photons exciting the electrons in some
+ semiconducting material.
+ Counting those electrons becomes a proxy for the number of photons detected.
+ Because of this, recording astronomical data is a counting problem, and
+ thus we can expect the number of photons recorded on a CCD to be distributed
+ as a Poisson distribution.
+ As with all electronic measurements, we must also be aware of sources of
+ noise.
+ Since CCD noise comes from electron counts, we can also expect it to be
+ distributed as a Poisson distribution.
+ The determination of 
+\begin_inset Formula $\lambda_{noise}$
+\end_inset
+
+ is an important problem that all astronomers face.
+ It is often told that a good rule of thumb for determining 
+\begin_inset Formula $\lambda_{noise}$
+\end_inset
+
+ is to take the per-pixel median of the calibration images.
+ We will investigate whether this rule of thumb holds in practice.
+\end_layout
+
+\begin_layout Section
+Problem Statement
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Problem-Statement"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We would like to determine the best-fitting 
+\begin_inset Formula $\lambda_{noise}$
+\end_inset
+
+ given a set of data.
+ Because we are dealing with a semiconducting system, how the electrons
+ are distributed in energy depends on the Fermi-Dirac distribution (Equation
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:FermiDirac"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+).
+\begin_inset Formula 
+\begin{equation}
+P\left(E\right)=\frac{1}{1+\exp\left(\left(E-E_{F}\right)/k_{B}T\right)}\label{eq:FermiDirac}
+\end{equation}
+
+\end_inset
+
+For silicon, the band gap is about 
+\begin_inset Formula $1.12\,eV$
+\end_inset
+
+ and the Fermi energy is approximately half of the band gap energy.
+ Using this distribution, we can model the number of noise electrons that
+ we count, which in turn gives us a distribution for 
+\begin_inset Formula $\lambda_{noise}$
+\end_inset
+
+.
+ Using this, we will generate sample data for our detected counts (see Section
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Algorithm-Analysis"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+Using the generated data, we must be able to infer 
+\begin_inset Formula $\lambda_{noise}$
+\end_inset
+
+.
+ The relationship between the probability distribution of the data given
+ 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ is related to probability distribution of 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ given the data by Bayes' theorem.
+ The posterior probability distribution is proportional to Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Pois"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\begin_inset Formula 
+\begin{equation}
+P\left(\lambda|x\right)\propto\frac{\lambda^{x}e^{-\lambda}}{x!}\label{eq:Pois}
+\end{equation}
+
+\end_inset
+
+Here, we do not know 
+\begin_inset Formula $\lambda$
+\end_inset
+
+.
+ Instead, we can input the data into Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Pois"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ and calculate the Log-Likelihood (Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:LL"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) as a function of 
+\begin_inset Formula $\lambda$
+\end_inset
+
+.
+\begin_inset Formula 
+\begin{equation}
+\text{LL}\left(\lambda\right)=\sum_{i}\log\left(P\left(\lambda|x_{i}\right)\right)\label{eq:LL}
+\end{equation}
+
+\end_inset
+
+The value of 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ that maximizes the LL will be our best estimate of 
+\begin_inset Formula $\lambda$
+\end_inset
+
+.
+ When viewed as a function of 
+\begin_inset Formula $\lambda$
+\end_inset
+
+, terms in the LL that don't explicitly depend on 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ are just normalizations and therefore don't need to be considered in the
+ maximization process.
+ The LL can therefore be written as
+\begin_inset Formula 
+\[
+\text{LL}\left(\lambda\right)=\sum_{i}x\log\lambda-\lambda
+\]
+
+\end_inset
+
+We numerically maximize this function to find 
+\begin_inset Formula $\hat{\lambda_{noise}}$
+\end_inset
+
+, the best estimate of 
+\begin_inset Formula $\lambda_{noise}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Algorithm Analysis
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Algorithm-Analysis"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+To generate the sample data, we perform Gibbs sampling.
+ In Gibbs sampling, this integration is approximated by taking intermediate
+ samples of these nuisance parameters according to their own distributions.
+ Then, using those samples, we generate samples of our rate parameters and
+ feed those rate parameters into a Poisson distribution.
+ This final set of Poisson-distributed samples is a simulated set of data
+ with these nuisance parameters integrated out.
+ We use this when constructing the simulated data for the Log-Likelihood
+ Ratio (LLR) of each model.
+\end_layout
+
+\begin_layout Standard
+So that our computation time remains reasonable, we use 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+texttt{numpy}
+\end_layout
+
+\end_inset
+
+ methods wherever possible.
+ This includes both array operations and random number generation.
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+texttt{numpy}
+\end_layout
+
+\end_inset
+
+ methods are faster than their pure-Python counterparts because they pass
+ execution to an underlying 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+texttt{C}
+\end_layout
+
+\end_inset
+
+ implementation.
+ Since compiled 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+texttt{C}
+\end_layout
+
+\end_inset
+
+ code is much faster than interpreted Python code, using 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+texttt{numpy}
+\end_layout
+
+\end_inset
+
+ affords greater computational speed, which allows us to get away with some
+ less efficient methods.
+\end_layout
+
+\begin_layout Standard
+In our noise model, a noise electron is counted if it is excited into the
+ conduction band.
+ For our purposes, this occurs when the electron's energy is above the Fermi
+ level.
+ The probability that an electron has this energy is
+\begin_inset Formula 
+\[
+P_{detected}=\int_{E_{f}}^{\infty}P\left(E\right)dE
+\]
+
+\end_inset
+
+We can easily perform this integral numerically, and do so using Monte Carlo
+ integration.
+ Since the tail probability in Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:FermiDirac"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ is extremely small, it is sufficient to just integrate up to a reasonable
+ upper bound, in our case 
+\begin_inset Formula $\left(E-E_{f}\right)/k_{B}T=1$
+\end_inset
+
+.
+ Once this probability is calculated, we can produce a uniformly-distributed
+ number from 
+\begin_inset Formula $0$
+\end_inset
+
+ to 
+\begin_inset Formula $1$
+\end_inset
+
+ for each free electron in the pixel and decide whether the electron is
+ excited or not.
+ The total number of excited electrons is our noise rate parameter, 
+\begin_inset Formula $\lambda_{noise}$
+\end_inset
+
+.
+ For our purposes, we will assume that the number of free electrons is fixed.
+\end_layout
+
+\begin_layout Standard
+Although the LL is a one-parameter function, it is a complicated one.
+ Therefore, we will numerically optimize the LL to find 
+\begin_inset Formula $\lambda$
+\end_inset
+
+.
+ Equivalent to maximizing the LL is minimizing the negative LL.
+ Therefore, we can take advantage of all the neat numerical minimization
+ technology that exists.
+ We use the 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+texttt{scipy}
+\end_layout
+
+\end_inset
+
+ optimization package to perform numerical minimization and obtain uncertainties.
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+texttt{scipy.optimize.minimize}
+\end_layout
+
+\end_inset
+
+ gives the optimal value of 
+\begin_inset Formula $\lambda_{noise}$
+\end_inset
+
+, and the inverse Hessian matrix of the fit.
+ Since this is a one-parameter fit, the inverse Hessian matrix will only
+ hold one value and will be the estimate of the variance.
+\end_layout
+
+\begin_layout Section
+Results
+\end_layout
+
+\begin_layout Standard
+A typical observing run can afford about 30 calibration frames for characterizin
+g noise.
+ Simulating 30 measurements per experiment for 100 experiments, we estimate
+ the noise rate parameter.
+ To see how well the median characterizes the error, we can plot the value
+ of 
+\begin_inset Formula $\hat{\lambda_{noise}}$
+\end_inset
+
+ against the median for each experiment.
+ If the median is a good estimate of 
+\begin_inset Formula $\hat{\lambda_{noise}}$
+\end_inset
+
+, then the resulting scatter should align along the line 
+\begin_inset Formula $y=x$
+\end_inset
+
+.
+ Equivalently, plotting the difference between 
+\begin_inset Formula $\hat{\lambda_{noise}}$
+\end_inset
+
+ and the mean should result in a scatter about the line 
+\begin_inset Formula $y=0$
+\end_inset
+
+.
+ With 
+\begin_inset Formula $T=300\,K$
+\end_inset
+
+, we present plots of both cases in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Left:-Plotting-"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 300K_scatter_plot.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 300K_residual_plot.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Top: Plotting 
+\begin_inset Formula $\hat{\lambda_{noise}}$
+\end_inset
+
+ vs the median for 
+\begin_inset Formula $T=300\,K$
+\end_inset
+
+.
+ Bottom: Plotting the difference between 
+\begin_inset Formula $\hat{\lambda_{noise}}$
+\end_inset
+
+ and the median against 
+\begin_inset Formula $\hat{\lambda_{noise}}$
+\end_inset
+
+.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Left:-Plotting-"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+ From either of those figures, we see that the median generally underestimates
+ 
+\begin_inset Formula $\hat{\lambda_{noise}}$
+\end_inset
+
+.
+ The mean difference is 
+\begin_inset Formula $0.405$
+\end_inset
+
+ counts per second.
+ Compared to the mean error on 
+\begin_inset Formula $\hat{\lambda_{noise}}$
+\end_inset
+
+ of 
+\begin_inset Formula $0.729$
+\end_inset
+
+ counts per second, we see that the median also gives a reasonable estimate
+ of the noise.
+ We repeat the analysis with 
+\begin_inset Formula $T=77\,K$
+\end_inset
+
+ to simulate the detector being cooled to liquid nitrogen temperature.
+ The result is presented in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Left:-Plotting--1"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 77K_scatter_plot.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 77K_residual_plot.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Left: Plotting 
+\begin_inset Formula $\hat{\lambda_{noise}}$
+\end_inset
+
+ vs the median for 
+\begin_inset Formula $T=77\,K$
+\end_inset
+
+.
+ Right: Plotting the difference between 
+\begin_inset Formula $\hat{\lambda_{noise}}$
+\end_inset
+
+ and the median against 
+\begin_inset Formula $\hat{\lambda_{noise}}$
+\end_inset
+
+.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Left:-Plotting--1"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ Again, the median underestimates 
+\begin_inset Formula $\hat{\lambda_{noise}}$
+\end_inset
+
+, this time with a mean difference of 
+\begin_inset Formula $0.411$
+\end_inset
+
+ counts per second.
+ Compared with the mean error on 
+\begin_inset Formula $\hat{\lambda_{noise}}$
+\end_inset
+
+ of 
+\begin_inset Formula $0.430$
+\end_inset
+
+ counts per second, the median still is a good estimate of the error.
+\end_layout
+
+\begin_layout Section
+Conclusions
+\end_layout
+
+\begin_layout Standard
+By simulating the noise detected by a CCD, we were able to estimate the
+ Poisson rate parameter of the noise distribution by maximizing the likelihood.
+ With this, we were able to show that the median of the data estimated 
+\begin_inset Formula $\hat{\lambda_{noise}}$
+\end_inset
+
+ reasonably well.
+ This means the astronomer's rule of thumb of using the median of the data
+ to estimate the error is a reliable rule of thumb and may not significantly
+ affect the results of astronomical data analysis if the detected noise
+ is Poisson distributed.
+ For observations that are signal-dominated, this rule of thumb can be safely
+ applied.
+ If the data is noise-dominated, however, this rule of thumb may not hold
+ and more care must be taken to characterize the noise distribution.
+\end_layout
+
+\end_body
+\end_document
