@@ -177,14 +177,25 @@ Introduction
 \begin_layout Standard
 One of the important problems in modern astronomy is the detection of a
  binary system.
- We will not be considering the process of detecting two objects in the
- field of view.
- Instead, given multiple images of a binary system taken at similar times,
- we would like to determine the separation distance between the two stars.
+ If we detect a binary system using direct imaging, the most basic information
+ we can ask is about the position of the stars.
+ Given multiple images of a binary system taken at similar times, we would
+ like to determine the separation distance between the two stars.
  By seeing how the separation distance changes in time, we can attempt to
  determine further orbital parameters, such as the total mass of the system,
  orbital period, and orbital inclination.
+ However, atmospheric seeing and detector limits can impede our measurement
  
+\begin_inset CommandInset citation
+LatexCommand cite
+key "2010Msngr.141....5M"
+literal "false"
+
+\end_inset
+
+.
+ Therefore, determining the position of two sources is the first step towards
+ determining these more interesting physical parameters.
 \end_layout
 
 \begin_layout Section
@@ -193,6 +204,9 @@ Problem Statement
 
 \begin_layout Standard
 Suppose a sequence of two-dimensional images with two sources on it.
+ We assume that the data has been cleaned such that the detector noise has
+ been removed and that the two sources are sufficiently bright so that they
+ are the only two sources in the frame.
  If the images are taken in a small period of time, then the source positions
  are fixed.
  However, because counting photons on the detector is a stochastic process,
@@ -205,7 +219,8 @@ Suppose a sequence of two-dimensional images with two sources on it.
 
 \begin_layout Standard
 We must have a model of how point sources appear on our detector.
- For this, we use the Airy disk (Equation 
+ For point sources passing through a circular aperture, the point spread
+ function is the Airy disk (Equation 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "eq:Airy"
@@ -253,15 +268,688 @@ noprefix "false"
 Algorithm Analysis
 \end_layout
 
+\begin_layout Subsection
+Data Generation
+\end_layout
+
 \begin_layout Standard
-asdf
+To generate the data, we generate a 
+\begin_inset Formula $100\times100$
+\end_inset
+
+ grid of pixels.
+ The two stars have fixed true positions.
+ We approximate seeing as a circularly symmetric, normally-distributed process
+ so that the 
+\begin_inset Formula $x$
+\end_inset
+
+ and 
+\begin_inset Formula $y$
+\end_inset
+
+ coordinates of the stars are shifted according to a normal distribution
+ with a single standard deviation 
+\begin_inset Formula $\sigma$
+\end_inset
+
+.
+ Knowing the central 
+\begin_inset Formula $x$
+\end_inset
+
+ and 
+\begin_inset Formula $y$
+\end_inset
+
+ values of the stars, we can translate the Airy disk pattern to be centered
+ on the stars.
+ We can then find the intensity of the Airy disk pattern at each position
+ on the detector and use those values as Poisson rate parameters.
+ The number of counts from the Poisson distribution gives us our data.
+ An example of the generated data is presented in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Simulated-image-data"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename imagedata.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Simulated image data of two point sources.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Simulated-image-data"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Finding Components
+\end_layout
+
+\begin_layout Standard
+If we are handed an image with two sources on it, we must algorithmically
+ find which pixels on the detector correspond to each source.
+ In the present case, where the sources on the detector are sufficiently
+ bright, we can use a version of k-means clustering to assign each pixel
+ with a star.
+ The procedure goes as follows: 
+\end_layout
+
+\begin_layout Enumerate
+Guess two points to be the cluster centers.
+\end_layout
+
+\begin_layout Enumerate
+With fixed centers, calculate the square distance between each point and
+ each center.
+\end_layout
+
+\begin_layout Enumerate
+Correspond each point with a center by minimizing the square distance.
+\end_layout
+
+\begin_layout Enumerate
+With fixed correspondence, calculate new center positions by taking the
+ flux-weighted average of the points (Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:fluxweight"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Enumerate
+Go to 2.
+ Repeat until the correspondences converge.
+\end_layout
+
+\begin_layout Standard
+In Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:fluxweight"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, 
+\begin_inset Formula $I_{j}$
+\end_inset
+
+ is the flux (or number of photon counts) at point 
+\begin_inset Formula $x_{j}$
+\end_inset
+
+.
+ An example of the result is presented in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Applying-k-means-clustering"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, while the separation of the data is presented in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Separating-the-image"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\begin_inset Formula 
+\begin{equation}
+\bar{x}_{i}=\frac{\sum_{j}I_{j}x_{j}}{\sum_{j}I_{j}}\label{eq:fluxweight}
+\end{equation}
+
+\end_inset
+
+
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename k-means.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Applying k-means clustering to the image data.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Applying-k-means-clustering"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename point_separation.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Separating the image data by star.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Separating-the-image"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Calculating the Optimal Position
+\end_layout
+
+\begin_layout Standard
+Once the data is separated by star, we can calculate the position of the
+ star on the image.
+ A common strategy in astronomy is to fit a Gaussian profile to the point
+ spread function.
+ Since we have a set of data, 
+\begin_inset Formula $I\left(x,y\right)$
+\end_inset
+
+, defined on a set of given points, we will follow this strategy.
+ We use the 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+texttt{numpy}
+\end_layout
+
+\end_inset
+
+ nonlinear least-squares algorithm to fit a general two-dimensional Gaussian
+ (Equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:gauss"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+) to our data.
+\begin_inset Formula 
+\begin{equation}
+f\left(x,y,\mu_{x},\mu_{y},A,a,b,c\right)=A\exp\left(a\left(x-\mu_{x}\right)^{2}+b\left(x-\mu_{x}\right)\left(y-\mu_{y}\right)+c\left(y-\mu_{y}\right)^{2}\right)\label{eq:gauss}
+\end{equation}
+
+\end_inset
+
+This fit gives us 
+\begin_inset Formula $\bar{x}$
+\end_inset
+
+ and 
+\begin_inset Formula $\bar{y}$
+\end_inset
+
+, the optimal coordinates of the star's center.
+ It also gives us the covariance matrix of the fit parameters, which allows
+ us to calculate the errors on the position.
+\end_layout
+
+\begin_layout Subsection
+Calculating the Mean Position
+\end_layout
+
+\begin_layout Standard
+We obtain values of 
+\begin_inset Formula $\bar{x}$
+\end_inset
+
+, 
+\begin_inset Formula $\bar{y}$
+\end_inset
+
+, and their errors from each image.
+ We now want to combine these values from a set of images to produce one
+ optimal position.
+ If the positions are normally distributed, we do this using the variance-weight
+ed average.
+ Let the weights be
+\begin_inset Formula 
+\[
+w_{i}=\frac{1}{\sigma_{i}^{2}}
+\]
+
+\end_inset
+
+The weighted average is then
+\begin_inset Formula 
+\[
+\left\langle \bar{x}\right\rangle =\frac{\sum_{i}w_{i}\bar{x}_{i}}{\sum_{i}w_{i}}
+\]
+
+\end_inset
+
+and its error is
+\begin_inset Formula 
+\[
+\sigma=\sqrt{\frac{1}{\sum_{i}w_{i}}}
+\]
+
+\end_inset
+
+Therefore, for each set of images, we obtain a single values for the star
+ positions.
+\end_layout
+
+\begin_layout Subsection
+Calculating the Separation Distance
+\end_layout
+
+\begin_layout Standard
+With the optimal positions of the stars, we can finally calculate the separation
+ distance.
+ It will simply be the Euclidean distance
+\begin_inset Formula 
+\[
+s=\sqrt{\left(x_{1}-x_{2}\right)^{2}+\left(y_{1}-y_{2}\right)^{2}}
+\]
+
+\end_inset
+
+We can calculate the error on this distance using formal error propagation.
+ The formula is
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\sqrt{\frac{\left(dx_{1}^{2}+dx_{2}^{2}\right)\left(x_{1}-x_{2}\right)^{2}+\left(dy_{1}^{2}+dy_{2}^{2}\right)\left(y_{1}-y_{2}\right)^{2}}{\left(x_{1}-x_{2}\right)^{2}+\left(y_{1}-y_{2}\right)^{2}}}
+\delta s=\sqrt{\frac{\left(\delta x_{1}^{2}+\delta x_{2}^{2}\right)\left(x_{1}-x_{2}\right)^{2}+\left(\delta y_{1}^{2}+\delta y_{2}^{2}\right)\left(y_{1}-y_{2}\right)^{2}}{\left(x_{1}-x_{2}\right)^{2}+\left(y_{1}-y_{2}\right)^{2}}}
 \]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Results
+\end_layout
+
+\begin_layout Standard
+With all of these ingredients, we can calculate the separation distance
+ given a set of images.
+ We simulated 500 experiments with 5 images per experiment.
+ We used a mean seeing of 
+\begin_inset Formula $3$
+\end_inset
+
+ pixels, and let the two stars have intensities of 
+\begin_inset Formula $10000$
+\end_inset
+
+ counts per second and 
+\begin_inset Formula $7000$
+\end_inset
+
+ counts per second.
+ The predicted positions over all of the experiments is presented in Figure
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Distribution-of-predicted"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, and the distribution of separation distances is presented in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Distribution-of-separation"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename position_predictions.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+The predicted star positions using 5 images per experiment.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Distribution-of-predicted"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename sepdist.png
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Distribution of separation distances using 5 images per experiment and 500
+ experiments.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Distribution-of-separation"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+ Unfortunately, it appears that only using 5 images does not allow us to
+ sufficiently localize the star positions.
+ As seen in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Distribution-of-predicted"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, each cluster of points has a large radius.
+ In addition, the distribution of separation distances over the experiments
+ is quite wide.
+ To defeat our 
+\begin_inset Formula $3$
+\end_inset
+
+ pixel seeing, we would have to take more measurements.
+ Using 500 experiments with 20 images per experiment, we obtain Figures
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:The-predicted-star"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Distribution-of-separation-1"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename more_images.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+The predicted star positions using 20 images per experiment.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:The-predicted-star"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename sepdist_more.png
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Distribution of separation distances using 20 images per experiment and
+ 500 experiments.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Distribution-of-separation-1"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+ Here, we see that the point clusters are tighter, and and the distribution
+ of separation distances is much more narrowly peaked.
+\end_layout
+
+\begin_layout Section
+Conclusions
+\end_layout
+
+\begin_layout Standard
+We saw that even if the seeing is relatively small compared to the size
+ of the image, we need to take lots of images to sufficiently localize the
+ stellar positions.
+ Taking many images may be necessary to produce good astrometry from these
+ images.
+ This reflects the fact that atmospheric seeing is one of the major contribution
+s to error in direct imaging.
+ Hence, the best solution is to remove the atmosphere and use space-based
+ telescopes for this sort of study.
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintCited"
+bibfiles "export-bibtex"
+options "plain"
 
 \end_inset
 
