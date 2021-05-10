@@ -246,7 +246,18 @@ noprefix "false"
  We will simulate each observation by taking samples from this distribution
  using fixed positions for the two sources.
  Using this simulated data, we will determine the positions of the sources
- 
+ and then calculate the separation distance.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\sqrt{\frac{\left(dx_{1}^{2}+dx_{2}^{2}\right)\left(x_{1}-x_{2}\right)^{2}+\left(dy_{1}^{2}+dy_{2}^{2}\right)\left(y_{1}-y_{2}\right)^{2}}{\left(x_{1}-x_{2}\right)^{2}+\left(y_{1}-y_{2}\right)^{2}}}
+\]
+
+\end_inset
+
+
 \end_layout
 
 \end_body
